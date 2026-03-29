@@ -1,30 +1,46 @@
 import pandas as pd
-import matplotlib.pyplot as plt
+import numpy as np
 
+from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
 
-data = pd.read_csv("reliance_features.csv")
 
-data = data.dropna()
+stocks = [
+    "RELIANCE.NS_features.csv",
+    "TCS.NS_features.csv",
+    "INFY.NS_features.csv",
+    "HDFCBANK.NS_features.csv",
+    "ICICIBANK.NS_features.csv"
+]
 
-X = data[["MA10", "MA50"]]
-y = data["Close"]
 
-model = LinearRegression()
+for file in stocks:
 
-model.fit(X, y)
+    print("\nTraining model for:", file)
 
-predictions = model.predict(X)
+    df = pd.read_csv(file)
 
-plt.figure(figsize=(12,6))
+    # Features
+    X = df[["MA10", "MA50", "Return"]]
 
-plt.plot(y.values, label="Real")
-plt.plot(predictions, label="Predicted")
+    # Target
+    y = df["Close"]
 
-plt.legend()
+    # Train test split
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, shuffle=False
+    )
 
-plt.title("Stock Price Prediction (Linear Regression)")
-plt.xlabel("Days")
-plt.ylabel("Price")
+    # Model
+    model = LinearRegression()
 
-plt.show()
+    model.fit(X_train, y_train)
+
+    # Prediction
+    predictions = model.predict(X_test)
+
+    # Error
+    rmse = np.sqrt(mean_squared_error(y_test, predictions))
+
+    print("RMSE:", rmse)
